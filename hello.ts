@@ -1,11 +1,4 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist",
-    "rootDir": "src"
-  },
-  "include": ["src"]
-}
+#!/bin/bash
+set -e
+pnpm install --frozen-lockfile
+pnpm --filter db push

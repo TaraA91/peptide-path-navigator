@@ -1,17 +1,78 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
-  },
-  "include": ["src"],
-  "references": [
-    {
-      "path": "../../lib/db"
-    },
-    {
-      "path": "../../lib/api-zod"
+import { getUncachableStripeClient } from "./stripeClient.js";
+
+async function createProducts() {
+  try {
+    const stripe = await getUncachableStripeClient();
+    console.log("Creating PeptidePath subscription products in Stripe...");
+
+    // ── Pro Plan ──────────────────────────────────────────────────────────────
+    const existingPro = await stripe.products.search({
+      query: "name:'PeptidePath Pro' AND active:'true'",
+    });
+
+    let proProductId: string;
+    if (existingPro.data.length > 0) {
+      console.log("PeptidePath Pro already exists:", existingPro.data[0].id);
+      proProductId = existingPro.data[0].id;
+    } else {
+      const proProduct = await stripe.products.create({
+        name: "PeptidePath Pro",
+        description:
+          "Unlimited protocols, PDF export, injection reminders, and full tracker access.",
+        metadata: { tier: "pro" },
+      });
+      proProductId = proProduct.id;
+      console.log(`Created Pro product: ${proProduct.id}`);
+
+      const proPrice = await stripe.prices.create({
+        product: proProductId,
+        unit_amount: 999,
+        currency: "usd",
+        recurring: { interval: "month" },
+        metadata: { tier: "pro" },
+      });
+      console.log(`Created Pro monthly price: $9.99/month (${proPrice.id})`);
     }
-  ]
+
+    // ── Elite Plan ────────────────────────────────────────────────────────────
+    const existingElite = await stripe.products.search({
+      query: "name:'PeptidePath Elite' AND active:'true'",
+    });
+
+    let eliteProductId: string;
+    if (existingElite.data.length > 0) {
+      console.log(
+        "PeptidePath Elite already exists:",
+        existingElite.data[0].id,
+      );
+      eliteProductId = existingElite.data[0].id;
+    } else {
+      const eliteProduct = await stripe.products.create({
+        name: "PeptidePath Elite",
+        description:
+          "AI protocol builder, advanced tracking features, and priority access to new features.",
+        metadata: { tier: "elite" },
+      });
+      eliteProductId = eliteProduct.id;
+      console.log(`Created Elite product: ${eliteProduct.id}`);
+
+      const elitePrice = await stripe.prices.create({
+        product: eliteProductId,
+        unit_amount: 2999,
+        currency: "usd",
+        recurring: { interval: "month" },
+        metadata: { tier: "elite" },
+      });
+      console.log(
+        `Created Elite monthly price: $29.99/month (${elitePrice.id})`,
+      );
+    }
+
+    console.log("✓ Products ready. Webhooks will sync data to the database.");
+  } catch (error: any) {
+    console.error("Error creating products:", error.message);
+    process.exit(1);
+  }
 }
+
+createProducts();

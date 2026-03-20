@@ -1,2 +1,17 @@
-export * from "./generated/api";
-export * from "./generated/types";
+{
+  "name": "@workspace/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hello": "tsx ./src/hello.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:"
+  },
+  "dependencies": {
+    "stripe": "^20.4.1"
+  }
+}
