@@ -1,50 +1,49 @@
-modules = ["nodejs-24", "postgresql-16"]
+import { runMigrations } from "stripe-replit-sync";
+import { getStripeSync } from "./stripeClient.js";
+import app from "./app.js";
 
-[[artifacts]]
-id = "artifacts/api-server"
+async function initStripe() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.warn("DATABASE_URL not set — skipping Stripe initialization");
+    return;
+  }
+  try {
+    console.log("Initializing Stripe schema...");
+    await runMigrations({ databaseUrl, schema: "stripe" });
+    console.log("Stripe schema ready");
 
-[[artifacts]]
-id = "artifacts/mockup-sandbox"
+    const stripeSync = await getStripeSync();
 
-[deployment]
-router = "application"
-deploymentTarget = "autoscale"
+    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
+    await stripeSync.findOrCreateManagedWebhook(
+      `${webhookBaseUrl}/api/stripe/webhook`,
+    );
+    console.log("Webhook configured");
 
-[deployment.postBuild]
-args = ["pnpm", "store", "prune"]
-env = { "CI" = "true" }
+    stripeSync
+      .syncBackfill()
+      .then(() => console.log("Stripe data synced"))
+      .catch((err: any) => console.error("Error syncing Stripe data:", err));
+  } catch (error: any) {
+    console.error("Failed to initialize Stripe:", error.message);
+  }
+}
 
-[workflows]
-runButton = "Project"
+(async () => {
+  const rawPort = process.env["PORT"];
+  if (!rawPort) throw new Error("PORT environment variable is required");
+  const port = Number(rawPort);
+  if (Number.isNaN(port) || port <= 0)
+    throw new Error(`Invalid PORT value: "${rawPort}"`);
 
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
+  try {
+    await initStripe();
+  } catch (err) {
+    console.error("Stripe init error (continuing anyway):", err);
+  }
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/peptidepath-video: Promo Video"
-
-[[workflows.workflow]]
-name = "artifacts/peptidepath-video: Promo Video"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm --filter @workspace/peptidepath-video run dev"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[agent]
-stack = "PNPM_WORKSPACE"
-expertMode = true
-integrations = ["stripe:1.0.0", "resend:1.0.0"]
-
-[postMerge]
-path = "scripts/post-merge.sh"
-timeoutMs = 20000
-
-[nix]
-channel = "stable-25_05"
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+})();
