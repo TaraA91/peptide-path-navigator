@@ -1,1 +1,33 @@
-{"version":3,"file":"custom-fetch.d.ts","sourceRoot":"","sources":["../src/custom-fetch.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,kBAAkB,GAAG,WAAW,GAAG;IAC7C,YAAY,CAAC,EAAE,MAAM,GAAG,MAAM,GAAG,MAAM,GAAG,MAAM,CAAC;CAClD,CAAC;AAEF,MAAM,MAAM,SAAS,CAAC,CAAC,GAAG,OAAO,IAAI,QAAQ,CAAC,CAAC,CAAC,CAAC;AAEjD,MAAM,MAAM,QAAQ,CAAC,CAAC,IAAI,CAAC,CAAC;AAoH5B,qBAAa,QAAQ,CAAC,CAAC,GAAG,OAAO,CAAE,SAAQ,KAAK;IAC9C,QAAQ,CAAC,IAAI,cAAc;IAC3B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,UAAU,EAAE,MAAM,CAAC;IAC5B,QAAQ,CAAC,IAAI,EAAE,CAAC,GAAG,IAAI,CAAC;IACxB,QAAQ,CAAC,OAAO,EAAE,OAAO,CAAC;IAC1B,QAAQ,CAAC,QAAQ,EAAE,QAAQ,CAAC;IAC5B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAC;gBAGnB,QAAQ,EAAE,QAAQ,EAClB,IAAI,EAAE,CAAC,GAAG,IAAI,EACd,WAAW,EAAE;QAAE,MAAM,EAAE,MAAM,CAAC;QAAC,GAAG,EAAE,MAAM,CAAA;KAAE;CAa/C;AAED,qBAAa,kBAAmB,SAAQ,KAAK;IAC3C,QAAQ,CAAC,IAAI,wBAAwB;IACrC,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,UAAU,EAAE,MAAM,CAAC;IAC5B,QAAQ,CAAC,OAAO,EAAE,OAAO,CAAC;IAC1B,QAAQ,CAAC,QAAQ,EAAE,QAAQ,CAAC;IAC5B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAC;IACrB,QAAQ,CAAC,OAAO,EAAE,MAAM,CAAC;IACzB,QAAQ,CAAC,KAAK,EAAE,OAAO,CAAC;gBAGtB,QAAQ,EAAE,QAAQ,EAClB,OAAO,EAAE,MAAM,EACf,KAAK,EAAE,OAAO,EACd,WAAW,EAAE;QAAE,MAAM,EAAE,MAAM,CAAC;QAAC,GAAG,EAAE,MAAM,CAAA;KAAE;CAiB/C;AA2FD,wBAAsB,WAAW,CAAC,CAAC,GAAG,OAAO,EAC3C,KAAK,EAAE,WAAW,GAAG,GAAG,EACxB,OAAO,GAAE,kBAAuB,GAC/B,OAAO,CAAC,CAAC,CAAC,CAiCZ"}
+import type { QueryKey, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
+import type { HealthStatus } from "./api.schemas";
+import { customFetch } from "../custom-fetch";
+import type { ErrorType } from "../custom-fetch";
+type AwaitedInput<T> = PromiseLike<T> | T;
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+/**
+ * Returns server health status
+ * @summary Health check
+ */
+export declare const getHealthCheckUrl: () => string;
+export declare const healthCheck: (options?: RequestInit) => Promise<HealthStatus>;
+export declare const getHealthCheckQueryKey: () => readonly ["/api/healthz"];
+export declare const getHealthCheckQueryOptions: <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>;
+export type HealthCheckQueryError = ErrorType<unknown>;
+/**
+ * @summary Health check
+ */
+export declare function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export {};
+//# sourceMappingURL=api.d.ts.map

@@ -5,8 +5,5 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-
-export * from "./errorResponse";
 export * from "./healthStatus";
-export * from "./waitlistSignupRequest";
-export * from "./waitlistSignupResponse";
+//# sourceMappingURL=index.d.ts.map

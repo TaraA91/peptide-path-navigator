@@ -5,7 +5,9 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-    status: string;
+
+export interface WaitlistSignupResponse {
+  success: boolean;
+  message: string;
+  alreadyRegistered: boolean;
 }
-//# sourceMappingURL=api.schemas.d.ts.map

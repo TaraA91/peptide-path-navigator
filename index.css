@@ -1,0 +1,59 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useVideoFlow } from './useVideoFlow';
+import Scene0_Open from './Scene0_Open';
+import Scene1_Tracker from './Scene1_Tracker';
+import Scene2_Library from './Scene2_Library';
+import Scene3_Calculator from './Scene3_Calculator';
+import Scene4_Inventory from './Scene4_Inventory';
+import Scene5_Close from './Scene5_Close';
+import Particles from './Particles';
+
+// Total ~60 seconds
+const SCENE_DURATIONS = [
+  8000,  // Open
+  12000, // Tracker
+  10000, // Library
+  12000, // Calculator
+  10000, // Inventory
+  8000   // Close
+];
+
+export default function VideoTemplate() {
+  const { currentScene } = useVideoFlow(SCENE_DURATIONS);
+
+  return (
+    <div className="w-full h-full bg-[#080C12] relative overflow-hidden font-sans text-white flex items-center justify-center isolate">
+      {/* Persistent Background Layer */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#080C12] via-[#0b121c] to-[#080C12]" />
+        
+        {/* Animated Glow */}
+        <motion.div
+          className="absolute rounded-full opacity-30 blur-[120px] bg-[#00C9A7]"
+          animate={{
+            x: currentScene === 0 ? '50vw' : currentScene === 1 ? '70vw' : currentScene === 2 ? '30vw' : currentScene === 3 ? '80vw' : currentScene === 4 ? '20vw' : '50vw',
+            y: currentScene === 0 ? '50vh' : currentScene === 1 ? '30vh' : currentScene === 2 ? '70vh' : currentScene === 3 ? '40vh' : currentScene === 4 ? '60vh' : '50vh',
+            scale: currentScene === 0 || currentScene === 5 ? 2 : 1.5,
+          }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+          style={{ width: '40vw', height: '40vw', x: '-50%', y: '-50%' }}
+        />
+        
+        <Particles count={currentScene === 0 || currentScene === 5 ? 80 : 30} />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="relative z-10 w-full h-full">
+        <AnimatePresence mode="wait">
+          {currentScene === 0 && <Scene0_Open key="scene0" duration={SCENE_DURATIONS[0]} />}
+          {currentScene === 1 && <Scene1_Tracker key="scene1" duration={SCENE_DURATIONS[1]} />}
+          {currentScene === 2 && <Scene2_Library key="scene2" duration={SCENE_DURATIONS[2]} />}
+          {currentScene === 3 && <Scene3_Calculator key="scene3" duration={SCENE_DURATIONS[3]} />}
+          {currentScene === 4 && <Scene4_Inventory key="scene4" duration={SCENE_DURATIONS[4]} />}
+          {currentScene === 5 && <Scene5_Close key="scene5" duration={SCENE_DURATIONS[5]} />}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
